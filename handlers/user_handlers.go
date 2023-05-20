@@ -35,6 +35,15 @@ func CreateUserHandler(c *gin.Context) {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create user")
 		return
 	}
+	todoRepo := repositories.NewTodoRepository()
+	todoInstance := models.Todo{
+		Email: createdUser.Email,
+		Todos: []string{},
+	}
+	_, err = todoRepo.CreateTodoInstance(todoInstance)
+	if err != nil {
+		utils.RespondWithError(c, http.StatusBadRequest, "Failed To Create Todo Instance")
+	}
 	utils.RespondWithJSON(c, http.StatusCreated, createdUser)
 }
 

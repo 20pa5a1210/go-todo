@@ -10,3 +10,9 @@ type User struct {
 	Password        string             `json:"password" bson:"password,omitempty"`
 	ConfirmPassword string             `json:"confirm_password" bson:"confirm_password,omitempty"`
 }
+
+type Todo struct {
+	Id    primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Email string             `json:"email" bson:"email,omitempty"`
+	Todos []string           `json:"todos" bson:"todos,omitempty"`
+}
