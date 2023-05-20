@@ -31,11 +31,31 @@ func NewUserRepository() *UserRepository {
 }
 
 func (ur *UserRepository) CreateUser(user models.User) (models.User, error) {
+	filter := bson.M{"email": user.Email}
+	existingUser := models.User{}
+	err := ur.collection.FindOne(context.Background(), filter).Decode(&existingUser)
+	if err != nil {
+		return existingUser, nil
+	}
 	result, err := ur.collection.InsertOne(context.Background(), user)
 	if err != nil {
 		return models.User{}, err
 	}
 	user.Id = result.InsertedID.(primitive.ObjectID)
+	return user, nil
+}
+
+func (ur *UserRepository) GetUserByEmail(email string) (models.User, error) {
+	var user models.User
+	filter := bson.M{"email": email}
+	err := ur.collection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			// doc not found
+			return models.User{}, nil
+		}
+		return models.User{}, nil
+	}
 	return user, nil
 }
 

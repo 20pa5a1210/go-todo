@@ -17,7 +17,21 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+	if user.Password != user.ConfirmPassword {
+		w.WriteHeader(http.StatusForbidden)
+		utils.RespondWithError(w, http.StatusForbidden, "Passwords Mismacth")
+		return
+	}
+
 	userRepo := repositories.NewUserRepository()
+	existingUser, _ := userRepo.GetUserByEmail(user.Email)
+
+	if existingUser.Email != "" {
+		w.WriteHeader(http.StatusConflict)
+		utils.RespondWithError(w, http.StatusConflict, "User Already Exists")
+		return
+	}
+
 	createdUser, err := userRepo.CreateUser(user)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, "Failed to create user")
