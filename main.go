@@ -25,5 +25,7 @@ func main() {
 			authGroup.GET("/profile", profileHandler.GetProfile)
 		}
 	}
+
+	router.POST("/addtodo/:id", handlers.AddTodo)
 	router.Run(":3033") // list
 }

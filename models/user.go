@@ -14,5 +14,10 @@ type User struct {
 type Todo struct {
 	Id    primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Email string             `json:"email" bson:"email,omitempty"`
-	Todos []string           `json:"todos" bson:"todos,omitempty"`
+	Todos []Todo             `json:"todos" bson:"todos,omitempty"`
+}
+
+type Todos struct {
+	ID   primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Text string             `json:"text" bson:"text,omitempty"`
 }

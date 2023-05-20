@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/20pa5a1210/go-todo/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -36,4 +37,25 @@ func (todo *TodoRepository) CreateTodoInstance(instance models.Todo) (models.Tod
 	}
 	instance.Id = result.InsertedID.(primitive.ObjectID)
 	return instance, nil
+}
+
+func (todo *TodoRepository) AddTodo(userId string, todos models.Todos) (models.Todos, error) {
+	newTodo := models.Todos{
+		ID:   primitive.NewObjectID(),
+		Text: todos.Text,
+	}
+	filter := bson.M{"email": userId}
+	update := bson.M{"$push": bson.M{"todos": newTodo}}
+
+	_, err := todo.collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return models.Todos{}, err
+	}
+	updateUser := models.Todos{}
+	err = todo.collection.FindOne(context.Background(), filter).Decode(&updateUser)
+	if err != nil {
+		return models.Todos{}, err
+	}
+
+	return updateUser, nil
 }

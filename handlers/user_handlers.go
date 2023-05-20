@@ -38,7 +38,7 @@ func CreateUserHandler(c *gin.Context) {
 	todoRepo := repositories.NewTodoRepository()
 	todoInstance := models.Todo{
 		Email: createdUser.Email,
-		Todos: []string{},
+		Todos: []models.Todo{},
 	}
 	_, err = todoRepo.CreateTodoInstance(todoInstance)
 	if err != nil {
