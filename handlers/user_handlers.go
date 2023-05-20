@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/20pa5a1210/go-todo/middleware"
 	"github.com/20pa5a1210/go-todo/models"
 	"github.com/20pa5a1210/go-todo/repositories"
 	"github.com/20pa5a1210/go-todo/utils"
@@ -35,6 +36,34 @@ func CreateUserHandler(c *gin.Context) {
 		return
 	}
 	utils.RespondWithJSON(c, http.StatusCreated, createdUser)
+}
+
+func LoginUser(c *gin.Context) {
+	var loginData struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&loginData); err != nil {
+		utils.RespondWithError(c, http.StatusBadRequest, "Invalid Payload")
+		return
+	}
+	userRepo := repositories.NewUserRepository()
+	user, err := userRepo.GetUserByEmail(loginData.Email)
+
+	if err != nil {
+		utils.RespondWithError(c, http.StatusUnauthorized, "Invalid Credintials")
+		return
+	}
+	if user.Password != loginData.Password {
+		utils.RespondWithError(c, http.StatusUnauthorized, "wrong Password(mismatch)")
+		return
+	}
+	token, err := middleware.GenerateJwt(user.Id.Hex())
+	if err != nil {
+		utils.RespondWithError(c, http.StatusInternalServerError, "Failed To generate Token")
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
 func GetUserHandler(c *gin.Context) {

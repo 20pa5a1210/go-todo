@@ -54,6 +54,20 @@ func (ur *UserRepository) GetUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
+func (ur *UserRepository) GetUserByID(userId string) (models.User, error) {
+	var user models.User
+	objId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return models.User{}, err
+	}
+	filter := bson.M{"_id": objId}
+	err = ur.collection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		return models.User{}, err
+	}
+	return user, nil
+}
+
 func (ur *UserRepository) GetUsers() ([]models.User, error) {
 	cursor, err := ur.collection.Find(context.Background(), bson.M{})
 	if err != nil {
