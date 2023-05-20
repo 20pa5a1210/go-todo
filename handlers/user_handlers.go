@@ -1,25 +1,23 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/20pa5a1210/go-todo/models"
 	"github.com/20pa5a1210/go-todo/repositories"
 	"github.com/20pa5a1210/go-todo/utils"
+	"github.com/gin-gonic/gin"
 )
 
-func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func CreateUserHandler(c *gin.Context) {
 	var user models.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := c.ShouldBindJSON(&user)
 	if err != nil {
-		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		utils.RespondWithError(c, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 	if user.Password != user.ConfirmPassword {
-		w.WriteHeader(http.StatusForbidden)
-		utils.RespondWithError(w, http.StatusForbidden, "Passwords Mismacth")
+		utils.RespondWithError(c, http.StatusForbidden, "Passwords Mismacth")
 		return
 	}
 
@@ -27,26 +25,39 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	existingUser, _ := userRepo.GetUserByEmail(user.Email)
 
 	if existingUser.Email != "" {
-		w.WriteHeader(http.StatusConflict)
-		utils.RespondWithError(w, http.StatusConflict, "User Already Exists")
+		utils.RespondWithError(c, http.StatusConflict, "User Already Exists")
 		return
 	}
 
 	createdUser, err := userRepo.CreateUser(user)
 	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, "Failed to create user")
+		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create user")
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusCreated, createdUser)
+	utils.RespondWithJSON(c, http.StatusCreated, createdUser)
 }
 
-func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func GetUserHandler(c *gin.Context) {
 	userRepo := repositories.NewUserRepository()
 	users, err := userRepo.GetUsers()
 	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch users")
+		utils.RespondWithError(c, http.StatusBadRequest, "Failed to retrieve Users")
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusOK, users)
+	utils.RespondWithJSON(c, http.StatusOK, users)
+}
+
+func GetUserByEmail(c *gin.Context) {
+	email := c.Param("email")
+	userRepo := repositories.NewUserRepository()
+	user, err := userRepo.GetUserByEmail(email)
+	if err != nil {
+		utils.RespondWithError(c, http.StatusForbidden, "Failed To retrieve User")
+		return
+	}
+	if user.Email == "" {
+		utils.RespondWithError(c, http.StatusNotFound, "User not found")
+		return
+	}
+	utils.RespondWithJSON(c, http.StatusOK, user)
 }

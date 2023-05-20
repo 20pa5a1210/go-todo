@@ -24,6 +24,7 @@ func NewUserRepository() *UserRepository {
 
 	db := client.Database("test")
 	collection := db.Collection("users")
+	log.Print("DB Connected")
 
 	return &UserRepository{
 		collection: collection,
@@ -31,12 +32,6 @@ func NewUserRepository() *UserRepository {
 }
 
 func (ur *UserRepository) CreateUser(user models.User) (models.User, error) {
-	filter := bson.M{"email": user.Email}
-	existingUser := models.User{}
-	err := ur.collection.FindOne(context.Background(), filter).Decode(&existingUser)
-	if err != nil {
-		return existingUser, nil
-	}
 	result, err := ur.collection.InsertOne(context.Background(), user)
 	if err != nil {
 		return models.User{}, err
