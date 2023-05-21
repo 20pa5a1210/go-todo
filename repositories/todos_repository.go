@@ -30,17 +30,17 @@ func NewTodoRepository() *TodoRepository {
 	}
 }
 
-func (todo *TodoRepository) CreateTodoInstance(instance models.Todo) (models.Todo, error) {
+func (todo *TodoRepository) CreateTodoInstance(instance models.Todos) (models.Todos, error) {
 	result, err := todo.collection.InsertOne(context.Background(), instance)
 	if err != nil {
-		return models.Todo{}, err
+		return models.Todos{}, err
 	}
-	instance.Id = result.InsertedID.(primitive.ObjectID)
+	instance.ID = result.InsertedID.(primitive.ObjectID)
 	return instance, nil
 }
 
-func (todo *TodoRepository) AddTodo(userId string, todos models.Todos) (models.Todos, error) {
-	newTodo := models.Todos{
+func (todo *TodoRepository) AddTodo(userId string, todos models.Todo) (models.Todos, error) {
+	newTodo := models.Todo{
 		ID:   primitive.NewObjectID(),
 		Text: todos.Text,
 	}
@@ -58,4 +58,17 @@ func (todo *TodoRepository) AddTodo(userId string, todos models.Todos) (models.T
 	}
 
 	return updateUser, nil
+}
+
+func (todo *TodoRepository) GetTodos(userId string) ([]models.Todo, error) {
+	var user models.Todos
+	filter := bson.M{"email": userId}
+	err := todo.collection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return []models.Todo{}, err
+		}
+		return nil, err
+	}
+	return user.Todos, nil
 }

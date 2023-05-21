@@ -36,7 +36,7 @@ func CreateUserHandler(c *gin.Context) {
 		return
 	}
 	todoRepo := repositories.NewTodoRepository()
-	todoInstance := models.Todo{
+	todoInstance := models.Todos{
 		Email: createdUser.Email,
 		Todos: []models.Todo{},
 	}
@@ -44,7 +44,7 @@ func CreateUserHandler(c *gin.Context) {
 	if err != nil {
 		utils.RespondWithError(c, http.StatusBadRequest, "Failed To Create Todo Instance")
 	}
-	utils.RespondWithJSON(c, http.StatusCreated, createdUser)
+	utils.RespondWithJSON(c, http.StatusCreated, "user", createdUser)
 }
 
 func LoginUser(c *gin.Context) {
@@ -82,7 +82,7 @@ func GetUserHandler(c *gin.Context) {
 		utils.RespondWithError(c, http.StatusBadRequest, "Failed to retrieve Users")
 		return
 	}
-	utils.RespondWithJSON(c, http.StatusOK, users)
+	utils.RespondWithJSON(c, http.StatusOK, "users", users)
 }
 
 func GetUserByEmail(c *gin.Context) {
@@ -97,5 +97,5 @@ func GetUserByEmail(c *gin.Context) {
 		utils.RespondWithError(c, http.StatusNotFound, "User not found")
 		return
 	}
-	utils.RespondWithJSON(c, http.StatusOK, user)
+	utils.RespondWithJSON(c, http.StatusOK, "retrieved user", user)
 }

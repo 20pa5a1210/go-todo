@@ -27,5 +27,6 @@ func main() {
 	}
 
 	router.POST("/addtodo/:id", handlers.AddTodo)
+	router.GET("/view/todos/:id", handlers.GetAllTodos)
 	router.Run(":3033") // list
 }

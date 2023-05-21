@@ -11,7 +11,7 @@ import (
 
 func AddTodo(c *gin.Context) {
 	userId := c.Param("id")
-	var todo models.Todos
+	var todo models.Todo
 	err := c.ShouldBindJSON(&todo)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusBadRequest, "Invalid payload")
@@ -23,5 +23,17 @@ func AddTodo(c *gin.Context) {
 		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to add todo")
 		return
 	}
-	utils.RespondWithJSON(c, http.StatusOK, updatedUser)
+	utils.RespondWithJSON(c, http.StatusOK, "updated todo", updatedUser)
+}
+
+func GetAllTodos(c *gin.Context) {
+	userId := c.Param("id")
+	todoRepo := repositories.NewTodoRepository()
+	todos, err := todoRepo.GetTodos(userId)
+	if err != nil {
+		utils.RespondWithError(c, http.StatusInternalServerError, "Failed To Retrieve Error")
+		return
+	}
+	utils.RespondWithJSON(c, http.StatusOK, "Todos", todos)
+
 }
