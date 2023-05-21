@@ -28,5 +28,6 @@ func main() {
 
 	router.POST("/addtodo/:id", handlers.AddTodo)
 	router.GET("/view/todos/:id", handlers.GetAllTodos)
+	router.DELETE("/todo/delete/:email/:id", handlers.DeleteTodo)
 	router.Run(":3033") // list
 }

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/20pa5a1210/go-todo/models"
@@ -71,4 +72,23 @@ func (todo *TodoRepository) GetTodos(userId string) ([]models.Todo, error) {
 		return nil, err
 	}
 	return user.Todos, nil
+}
+
+func (todo *TodoRepository) DeleteTodo(todoId string, email string) error {
+	filter := bson.M{"email": email}
+	update := bson.M{
+		"$pull": bson.M{
+			"todos": bson.M{
+				"_id": todoId,
+			},
+		},
+	}
+	updated, err := todo.collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	}
+	if updated.ModifiedCount == 0 {
+		return errors.New("todo not found")
+	}
+	return nil
 }

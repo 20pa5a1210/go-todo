@@ -35,5 +35,24 @@ func GetAllTodos(c *gin.Context) {
 		return
 	}
 	utils.RespondWithJSON(c, http.StatusOK, "Todos", todos)
+}
 
+func DeleteTodo(c *gin.Context) {
+	email := c.Param("email")
+	todoId := c.Param("id")
+
+	todoRepo := repositories.NewTodoRepository()
+	err := todoRepo.DeleteTodo(todoId, email)
+	if err != nil {
+		utils.RespondWithError(c, http.StatusInternalServerError, "todo not found")
+		return
+	}
+
+	remainingTodos, err := todoRepo.GetTodos(email)
+	if err != nil {
+		utils.RespondWithError(c, http.StatusNotExtended, "todo deleted but failed to return pending todos")
+		return
+	}
+
+	utils.RespondWithJSON(c, http.StatusOK, "remaining todos", remainingTodos)
 }
